@@ -15,7 +15,7 @@ pub fn par_indexer(walker_output: Vec<PathBuf>) -> Result<(), Box<dyn Error>> {
         .filter_map(|file| metadata_to_stuct(&file).ok())
         .collect();
 
-    entries.sort_by(|a, b| a.path.cmp(&b.path));
+    entries.sort_by(|a, b| natord::compare(&a.path.to_string_lossy(), &b.path.to_string_lossy()));
 
     write_better(entries)?;
     Ok(())
@@ -40,7 +40,8 @@ fn write_better(entries: Vec<FileMeta>) -> Result<(), Box<dyn Error>> {
     // fs::metadata(path) returns error if path do not exists.
     // .is_ok() transform's success into true and faliure into false
     if fs::metadata("Index.dat").is_ok() {
-        crate::index_loader::load_index()?;
+        let old = crate::index_loader::load_index()?;
+        let output = crate::comparison_engine::comparison(&entries, &old);
     } else {
         let file = std::fs::File::create("Index.dat")?;
         let mut writer = BufWriter::new(file);
