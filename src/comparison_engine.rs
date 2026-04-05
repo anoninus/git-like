@@ -1,6 +1,6 @@
+use crate::file_meta::FileMeta;
 use std::{collections::HashMap, path::PathBuf};
 
-use crate::par_indexer::FileMeta;
 
 pub fn compare(old: Vec<FileMeta>, new: Vec<FileMeta>) {
   let mut old_map: HashMap<PathBuf, FileMeta> =
