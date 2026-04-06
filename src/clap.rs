@@ -42,7 +42,7 @@ fn add_operation(args: ArgsForAdd) -> Result<(), Box<dyn Error>> {
     for path in refined_paths {
         if path == Path::new(".") {
             let walker_output = crate::walker::repo_walker(path)?;
-            crate::parallel::par_indexer(walker_output)?;
+            crate::indexer::par_indexer(walker_output)?;
         } else if path.is_dir() {
             // walkdir logic
         } else if path.is_file() {

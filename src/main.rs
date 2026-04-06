@@ -1,6 +1,6 @@
 mod clap;
 mod index_loader;
-mod parallel;
+mod indexer;
 mod walker;
 mod refiner;
 mod comparison_engine;
