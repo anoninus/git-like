@@ -1,18 +1,31 @@
 use crate::file_meta::FileMeta;
-use std::{error::Error, fs, io::Write};
 use std::io::BufWriter;
+use std::{
+    error::Error,
+    fs::{self, File},
+    io::BufReader,
+};
+
 pub fn write_better(entries: Vec<FileMeta>) -> Result<(), Box<dyn Error>> {
-    // fs::metadata(path) returns error if path do not exists.
-    // .is_ok() transform's success into true and faliure into false
-    if fs::metadata("Index.dat").is_ok() {
-        let old = crate::index_loader::load_index()?;
-        let output = crate::comparison_engine::comparison(&entries, &old);
+    if fs::metadata("index.json").is_ok() {
+        let old_data = load_index()?;
+        let compared_output = crate::comparison_engine::compare(old_data, entries);
     } else {
-        let file = std::fs::File::create("Index.dat")?;
-        let mut writer = BufWriter::new(file);
-        for e in entries {
-            writeln!(writer, "{}, {}, {}", e.path.display(), e.size, e.modified)?;
-        }
+        save_index(&entries)?;
     }
     Ok(())
+}
+
+pub fn save_index(entries: &Vec<FileMeta>) -> Result<(), Box<dyn Error>> {
+    let file = File::create("index.json")?;
+    let writer = BufWriter::new(file);
+    serde_json::to_writer(writer, entries)?;
+    Ok(())
+}
+
+pub fn load_index() -> Result<Vec<FileMeta>, Box<dyn Error>> {
+    let file = File::open("index.json")?;
+    let reader = BufReader::new(file);
+    let entries = serde_json::from_reader(reader)?;
+    Ok(entries)
 }
